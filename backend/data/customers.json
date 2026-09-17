@@ -1,0 +1,26 @@
+[
+  {
+    "id": "seed1",
+    "name": "Priya Sharma",
+    "phone": "9876543210",
+    "planPrice": 3000,
+    "startDate": "2026-09-01",
+    "pauses": []
+  },
+  {
+    "id": "seed2",
+    "name": "Arjun Mehta",
+    "phone": "9123456780",
+    "planPrice": 3200,
+    "startDate": "2026-09-01",
+    "pauses": [{ "start": "2026-09-15", "end": null }]
+  },
+  {
+    "id": "seed3",
+    "name": "Fatima Khan",
+    "phone": "9988776655",
+    "planPrice": 2800,
+    "startDate": "2026-09-01",
+    "pauses": []
+  }
+]

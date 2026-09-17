@@ -1,0 +1,14 @@
+{
+  "name": "tiffin-ledger-backend",
+  "version": "1.0.0",
+  "description": "API + static server for the Tiffin Ledger app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
+  }
+}

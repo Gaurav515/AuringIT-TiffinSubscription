@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiffin Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top-row">
+    <div class="brand">
+      <h1 class="serif">Tiffin Ledger</h1>
+      <p>Track who's eating, who's away, and what everyone owes.</p>
+    </div>
+    <button class="btn btn-primary" id="openAdd">+ Add customer</button>
+  </div>
+
+  <div class="hero">
+    <div>
+      <div class="hero-num serif" id="heroTotal">₹0</div>
+      <div class="hero-label" id="heroLabel">expected this month</div>
+    </div>
+    <div class="hero-counts">
+      <div><div class="n" id="countActive">0</div><div class="l">active</div></div>
+      <div><div class="n" id="countPaused">0</div><div class="l">paused</div></div>
+    </div>
+    <div class="month-nav">
+      <button id="prevMonth">‹</button>
+      <div class="month-label" id="monthLabel"></div>
+      <button id="nextMonth">›</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="search-box">
+      <input type="text" id="search" placeholder="Search by phone or name…">
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab active" data-filter="all">All</button>
+      <button class="tab" data-filter="active">Active</button>
+      <button class="tab" data-filter="paused">Paused</button>
+    </div>
+  </div>
+
+  <div class="list" id="list"></div>
+  <div class="empty" id="emptyState" style="display:none;">
+    <div class="serif">No customers yet</div>
+    <div>Add your first customer to start billing them correctly.</div>
+  </div>
+</div>
+
+<!-- Add customer modal -->
+<div class="overlay" id="addOverlay">
+  <div class="modal">
+    <h2 class="serif">New customer</h2>
+    <p class="sub">Set their monthly plan. You can pause deliveries anytime later.</p>
+    <div class="field">
+      <label for="cName">Name</label>
+      <input type="text" id="cName" placeholder="e.g. Priya Sharma">
+    </div>
+    <div class="field">
+      <label for="cPhone">Phone number</label>
+      <input type="tel" id="cPhone" placeholder="e.g. 9876543210">
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="cPrice">Monthly plan price (₹)</label>
+        <input type="number" id="cPrice" placeholder="3000" min="0">
+      </div>
+      <div class="field">
+        <label for="cStart">Start date</label>
+        <input type="date" id="cStart">
+      </div>
+    </div>
+    <div class="error" id="addError">Please fill in name, phone and plan price.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelAdd">Cancel</button>
+      <button class="btn btn-primary" id="saveAdd">Add customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pause modal -->
+<div class="overlay" id="pauseOverlay">
+  <div class="modal">
+    <h2 class="serif">Pause deliveries</h2>
+    <p class="sub">They won't be billed for these days.</p>
+    <div class="field-row">
+      <div class="field">
+        <label for="pStart">Paused from</label>
+        <input type="date" id="pStart">
+      </div>
+      <div class="field">
+        <label for="pEnd">Resumes on (optional)</label>
+        <input type="date" id="pEnd">
+      </div>
+    </div>
+    <div class="hint">Leave "resumes on" blank if you're not sure yet — you can resume manually anytime.</div>
+    <div class="error" id="pauseError">Resume date can't be before the pause start date.</div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="cancelPause">Cancel</button>
+      <button class="btn btn-primary" id="savePause">Confirm pause</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
