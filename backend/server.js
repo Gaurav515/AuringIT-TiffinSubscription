@@ -3,6 +3,8 @@ const cors = require('cors');
 const path = require('path');
 
 const customersRouter = require('./routes/customers');
+const clockRouter = require('./routes/clock');          // NEW
+const notifications = require('./notifications');       // NEW
 const { loadAll } = require('./data');
 const { computeBill, currentStatus } = require('./billing');
 
@@ -11,6 +13,18 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/customers', customersRouter);
+app.use('/api/clock', clockRouter);                      // NEW
+
+// GET /api/outbox -> every notification the Notification Service has sent
+app.get('/api/outbox', (req, res) => {                    // NEW
+  res.json(notifications.getOutbox());
+});
+
+// DELETE /api/outbox -> clear it (handy for re-running a test from scratch)
+app.delete('/api/outbox', (req, res) => {                 // NEW
+  notifications.clearOutbox();
+  res.status(204).end();
+});
 
 // GET /api/summary?year=&month=  -> totals for the hero bar
 app.get('/api/summary', (req, res) => {
