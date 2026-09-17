@@ -1,80 +1,44 @@
-# Tiffin Ledger
+# LunchLedger
 
-A small backend + frontend app for a tiffin (home lunch delivery) owner:
-subscribe a customer, pause/resume their deliveries, and get a correctly
-pro-rated bill at month end. Look customers up by phone, and see who's
-active vs. paused at a glance.
+A small MERN app for a home-style tiffin owner. Owners register, subscribe customers, record delivery pauses, search by name or phone, and view prorated monthly bills.
 
-```
-tiffin-app/
-├── backend/
-│   ├── server.js         # Express app: mounts the API, serves the frontend
-│   ├── billing.js        # All date + pro-rating math (the core logic)
-│   ├── data.js            # Tiny JSON-file "database"
-│   ├── data/customers.json
-│   ├── routes/customers.js
-│   └── package.json
-└── frontend/
-    ├── index.html
-    ├── style.css
-    └── app.js             # Calls the API with fetch(), renders the UI
-```
+## Setup
 
-## Run it
+Requirements: Node.js 20+, npm, and MongoDB (local or Atlas). From the project root:
 
-```bash
-cd backend
-npm install
-npm start
-```
+1. Copy `backend/.env.example` to `backend/.env`. Set `MONGODB_URI` and a long random `JWT_SECRET`.
+2. Run `npm run install:all`.
+3. Run `npm run dev`.
+4. Open `http://localhost:5173` and create an owner account. API runs at `http://localhost:4000`.
 
-Then open **http://localhost:4000** — the backend also serves the frontend,
-so this one command runs the whole thing.
+For GitHub Codespaces, forward ports 5173 and 4000. Open the forwarded 5173 URL. Vite proxies `/api` to port 4000. If the backend cannot connect, verify MongoDB is reachable from Codespaces (an Atlas connection string works).
 
-The app comes seeded with 3 sample customers so you can see it working
-right away; delete them from the UI once you add your real ones.
+## Billing rule
 
-## The billing rule
+The monthly price is divided by the number of Monday–Friday dates in that calendar month, then multiplied by eligible delivered weekdays. Eligible days begin on the subscription start date and exclude all inclusive pause dates. The current month is provisional through today; future days are not billed. Amounts round to two decimals. The app assumes a subscribed, unpaused weekday was delivered; actual driver delivery confirmation is a future feature.
 
-```
-bill = (plan price ÷ weekdays in the month) × weekdays actually delivered
-```
+## API endpoints
 
-"Delivered" = weekdays in the month, from whichever is later of (their
-subscription start date, the 1st of the month), through month end, **minus**
-any weekdays that fall inside a logged pause. This means:
+All customer routes require `Authorization: Bearer <token>` and return only the logged-in owner's data.
 
-- A customer who joins mid-month is prorated from their start date.
-- A paused range never changes the plan price — it only removes days from
-  what they're billed for.
-- Resuming closes an open-ended pause as of yesterday, so today counts as
-  a delivered day again.
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | `/api/health` | Health check |
+| POST | `/api/auth/register` | Register owner (`name`, `email`, `password`) |
+| POST | `/api/auth/login` | Log in (`email`, `password`) |
+| GET | `/api/customers?q=&page=1&limit=10&sort=name&order=asc` | Search, paginate, sort customers |
+| POST | `/api/customers` | Subscribe customer (`name`, `phone`, `address`, `monthlyPrice`, `startDate`) |
+| GET | `/api/customers/:id` | Get customer and pause history |
+| POST | `/api/customers/:id/pause` | Pause (`startDate`, optional `endDate`) |
+| POST | `/api/customers/:id/resume` | End open pause before `resumeDate` (defaults to today) |
+| GET | `/api/customers/:id/bill?month=YYYY-MM` | Get prorated bill |
 
-All of this logic lives in `backend/billing.js`, independent of the routes
-and the UI, so it's easy to unit test or move to a different storage layer
-later.
+Dates use `YYYY-MM-DD`; billing month uses `YYYY-MM`. Search matches name or phone. Sort fields are name, phone, startDate, monthlyPrice and createdAt. Phone numbers are unique per owner. Pauses cannot overlap.
 
-## API
+## Debug and test
 
-All endpoints are under `/api`.
+Run `npm test` for billing tests and `npm run build --prefix frontend` to verify the UI build. Check the backend terminal for database connection failures. A 401 response means the owner should log in again; a 409 response usually means a duplicate phone or overlapping pause.
 
-| Method | Path | Purpose |
-|---|---|---|
-| GET | `/customers?search=&status=all\|active\|paused&year=&month=` | List customers, each annotated with `status` and a full `bill` breakdown for the given month (defaults to current month) |
-| POST | `/customers` | Create a customer — `{ name, phone, planPrice, startDate }` |
-| GET | `/customers/:id?year=&month=` | One customer with status + bill |
-| PUT | `/customers/:id` | Update name/phone/planPrice/startDate |
-| DELETE | `/customers/:id` | Remove a customer |
-| POST | `/customers/:id/pause` | `{ start, end? }` — log a pause |
-| POST | `/customers/:id/resume` | Close any open pause as of yesterday |
-| DELETE | `/customers/:id/pauses/:index` | Remove a logged pause entirely |
-| GET | `/summary?year=&month=` | `{ total, active, paused }` for the hero bar |
+## Stack
 
-## Storage
-
-Customers are stored in `backend/data/customers.json` — good enough for one
-owner running this on one machine. If you need multiple staff members or
-access from more than one device at once, swap `backend/data.js` for a real
-database (SQLite or Postgres); nothing else needs to change, since
-`billing.js` and the routes only depend on the shape of a customer object,
-not on how it's stored.
+React + Vite frontend; Node.js + Express REST API; MongoDB + Mongoose; bcrypt password hashes and JWT login.
